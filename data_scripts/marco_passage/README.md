@@ -1,0 +1,1 @@
+data like used in OpenMatch docs.
