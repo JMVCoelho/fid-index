@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=marco-docs-maxp
+#SBATCH --job-name=marco-docs-fusion
 
 # The line below writes to a logs dir inside the one where sbatch was called
 # %x will be replaced by the job name, and %j by the job id
@@ -25,7 +25,7 @@ conda activate openmatch
 
 split=documents
 text_length=128
-n_passages=4 # num maxp passages
+n_passages=4 # fusion passages
 
 n_gpus=4
 
@@ -33,7 +33,7 @@ n_gpus=4
 
 initial_model=./models/t5-base-scaled
 
-first_trained_model_name=t5-base-marco-$split-maxp
+first_trained_model_name=t5-base-marco-$split-fusion
 
 negatives=./marco/$split/train.negatives.tsv
 
@@ -101,7 +101,7 @@ valid_data=$initial_data_save_folder/val.jsonl
     --run_name $first_trained_model_name \
     --evaluation_strategy steps \
     --dataloader_num_workers 4 \
-    --maxp $n_passages
+    --fusion $n_passages
 
 echo "########################################"
 echo "done first training. sampling negatives"
@@ -127,7 +127,7 @@ mkdir $run_save
     --p_max_len $text_length  \
     --fp16  \
     --dataloader_num_workers 1 \
-    --maxp $n_passages
+    --fusion $n_passages
 
 /home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes $n_gpus --multi_gpu OpenMatch/src/openmatch/driver/retrieve.py  \
     --output_dir $embeddings_out  \
@@ -201,7 +201,7 @@ second_model_output_path=./models/marco/$second_trained_model_name
     --run_name $second_trained_model_name \
     --evaluation_strategy steps \
     --dataloader_num_workers 4 \
-    --maxp $n_passages
+    --fusion $n_passages
 
 
 # evaluate
@@ -230,7 +230,7 @@ mkdir $run_save
     --p_max_len $text_length  \
     --fp16  \
     --dataloader_num_workers 1 \
-    --maxp $n_passages
+    --fusion $n_passages
 
 /home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes $n_gpus --multi_gpu OpenMatch/src/openmatch/driver/retrieve.py  \
     --output_dir $embeddings_out  \
