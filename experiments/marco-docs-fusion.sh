@@ -29,7 +29,7 @@ n_passages=4 # fusion passages
 
 n_gpus=4
 
-#python data_scripts/marco_documents/build_data_maxp.py $text_length $n_passages
+#python scripts/marco_documents/build_data_maxp.py $text_length $n_passages
 
 initial_model=./models/t5-base-scaled
 
@@ -244,6 +244,6 @@ mkdir $run_save
     --trec_save_path $run_save/dev.trec \
     --dataloader_num_workers 1 \
     --use_gpu \
-    --retrieve_depth 1000
+    --retrieve_depth 100
 
 python OpenMatch/scripts/evaluate.py $dev_qrels $run_save/dev.trec > $run_save/dev.results

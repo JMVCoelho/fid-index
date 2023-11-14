@@ -46,34 +46,34 @@ negatives_save_folder=./marco/$split/negatives/$model_name/
 mkdir $run_save
 
 
-#/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes 4 --multi_gpu OpenMatch/src/openmatch/driver/build_index.py  \
-#    --output_dir $output_dir \
-#    --model_name_or_path $model  \
-#    --per_device_eval_batch_size 6000  \
-#    --corpus_path $corpus  \
-#    --doc_template "Title: <title> Text: <text>"  \
-#    --doc_column_names id,title,text  \
-#    --q_max_len 32  \
-#    --p_max_len 128  \
-#    --fp16  \
-#    --dataloader_num_workers 4
-#
-#echo "search"
-#
-#/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes 4 --multi_gpu OpenMatch/src/openmatch/driver/retrieve.py  \
-#    --output_dir $output_dir  \
-#    --model_name_or_path $model  \
-#    --per_device_eval_batch_size 600  \
-#    --query_path $queries  \
-#    --query_template "<text>"  \
-#    --query_column_names id,text  \
-#    --q_max_len 32  \
-#    --fp16  \
-#    --trec_save_path $run_save/train.trec \
-#    --dataloader_num_workers 4 \
-#    --use_gpu
-#
-#echo "building files"
+/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes 4 --multi_gpu OpenMatch/src/openmatch/driver/build_index.py  \
+    --output_dir $output_dir \
+    --model_name_or_path $model  \
+    --per_device_eval_batch_size 6000  \
+    --corpus_path $corpus  \
+    --doc_template "Title: <title> Text: <text>"  \
+    --doc_column_names id,title,text  \
+    --q_max_len 32  \
+    --p_max_len 128  \
+    --fp16  \
+    --dataloader_num_workers 4
+
+echo "search"
+
+/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes 4 --multi_gpu OpenMatch/src/openmatch/driver/retrieve.py  \
+    --output_dir $output_dir  \
+    --model_name_or_path $model  \
+    --per_device_eval_batch_size 600  \
+    --query_path $queries  \
+    --query_template "<text>"  \
+    --query_column_names id,text  \
+    --q_max_len 32  \
+    --fp16  \
+    --trec_save_path $run_save/train.trec \
+    --dataloader_num_workers 4 \
+    --use_gpu
+
+echo "building files"
 
 
 python OpenMatch/scripts/msmarco/build_hn.py  \

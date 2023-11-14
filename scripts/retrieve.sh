@@ -18,23 +18,17 @@
 # replace the XXX with nvidia_a100-pcie-40gb or nvidia_a100-sxm4-40gb
 # replace the YYY with the number of GPUs that you need, 1 to 8 PCIe or 1 to 4 SXM4
 
-#SBATCH --gres=gpu:nvidia_a100-pcie-40gb:4
+#SBATCH --gres=gpu:nvidia_a100-pcie-40gb:2
 
 eval "$(conda shell.bash hook)"
 conda activate openmatch
 
-export WORLD_SIZE=4
-#gpu node level id
-export LOCAL_RANK=0,1,2,3
-#gpu cluster level id
-export RANK=0,1,2,3
+split=documents
 
-split=passage
-
-model_name=t5-base-marco-$split-self-hn-1
+model_name=t5-base-marco-$split-fusion
 model_to_eval=./models/marco/$model_name
 output_dir=./marco/$split/embeddings/$model_name
-run_save=./marco/$split/negatives/$model_name
+run_save=./marco/$split/results/$model_name
 
 corpus=./marco/$split/corpus.tsv 
 queries=./marco/$split/dev.query.txt
@@ -54,7 +48,7 @@ mkdir $run_save
     --fp16  \
     --dataloader_num_workers 1
 
-/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes 4 --multi_gpu OpenMatch/src/openmatch/driver/retrieve.py  \
+/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes 2 --multi_gpu --main_process_port 30000 OpenMatch/src/openmatch/driver/retrieve.py  \
     --output_dir $output_dir  \
     --model_name_or_path $model_to_eval \
     --per_device_eval_batch_size 600  \
@@ -65,6 +59,7 @@ mkdir $run_save
     --fp16  \
     --trec_save_path $run_save/dev.trec \
     --dataloader_num_workers 1 \
-    --use_gpu
+    --use_gpu \
+    --fusion 4
 
-python OpenMatch/scripts/evaluate.py $qrels $run_save/dev.trec
+python OpenMatch/scripts/evaluate.py $qrels $run_save/dev.trec > $run_save/dev.results

@@ -23,7 +23,7 @@
 eval "$(conda shell.bash hook)"
 conda activate openmatch
 
-#python data_scripts/marco_documents/build_data_firstp.py 
+#python scripts/marco_documents/build_data_firstp.py 
 
 split=documents
 text_length=128
@@ -31,7 +31,7 @@ n_gpus=4
 
 initial_model=./models/t5-base-scaled
 
-first_trained_model_name=t5-base-marco-$split
+first_trained_model_name=t5-base-marco-$split-firstp
 
 negatives=./marco/$split/train.negatives.tsv
 
@@ -41,7 +41,7 @@ corpus=./marco/$split/corpus_firstp_$text_length.tsv
 
 initial_data_save_folder=./marco/$split/processed_data/$first_trained_model_name
 
-mkdir -p $save_folder
+mkdir -p $initial_data_save_folder
 
 echo "########################################"
 echo "Building initial data"
@@ -86,8 +86,8 @@ valid_data=$initial_data_save_folder/val.jsonl
     --train_path $train_data  \
     --eval_path $valid_data  \
     --fp16 \
-    --per_device_train_batch_size 40 \
-    --gradient_accumulation_steps 2 \
+    --per_device_train_batch_size 10 \
+    --gradient_accumulation_steps 8 \
     --train_n_passages 8  \
     --learning_rate 5e-6  \
     --q_max_len 32  \
@@ -109,7 +109,7 @@ model=$first_model_output_path
 embeddings_out=./marco/$split/embeddings/$first_trained_model_name
 run_save=./marco/$split/negatives/$first_trained_model_name
 
-second_trained_model_name=t5-base-marco-$split-self-hn-1
+second_trained_model_name=$first_trained_model_name-self-hn-1
 second_trained_model_data_path=./marco/$split/processed_data/$second_trained_model_name
 
 mkdir $run_save
@@ -186,8 +186,8 @@ second_nodel_output_path=./models/marco/$second_trained_model_name
     --train_path $train_data  \
     --eval_path $valid_data  \
     --fp16 \
-    --per_device_train_batch_size 40 \
-    --gradient_accumulation_steps 2 \
+    --per_device_train_batch_size 10 \
+    --gradient_accumulation_steps 8 \
     --train_n_passages 8  \
     --learning_rate 5e-6  \
     --q_max_len 32  \
@@ -239,6 +239,6 @@ mkdir $run_save
     --trec_save_path $run_save/dev.trec \
     --dataloader_num_workers 1 \
     --use_gpu \
-    --retrieve_depth 1000
+    --retrieve_depth 100
 
 python OpenMatch/scripts/evaluate.py $dev_qrels $run_save/dev.trec > $run_save/dev.results
